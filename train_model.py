@@ -1,43 +1,34 @@
-import os
-import numpy as np
 import tensorflow as tf
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Conv2D, MaxPooling2D, Flatten, Dense, Dropout
 from tensorflow.keras.optimizers import Adam
+from sklearn.model_selection import train_test_split
 from utils import load_data
 
-class DogBreedTrainer:
-    def __init__(self, train_dir, img_size=(224, 224), batch_size=32, epochs=15):
-        self.train_dir = train_dir
-        self.img_size = img_size
-        self.batch_size = batch_size
-        self.epochs = epochs
-        self.model = self.build_model()
+def build_model(input_shape, num_classes):
+    model = Sequential([
+        Conv2D(32, (3, 3), activation='relu', input_shape=input_shape),
+        MaxPooling2D((2, 2)),
+        Conv2D(64, (3, 3), activation='relu'),
+        MaxPooling2D((2, 2)),
+        Flatten(),
+        Dense(128, activation='relu'),
+        Dropout(0.5),
+        Dense(num_classes, activation='softmax')
+    ])
+    return model
 
-    def build_model(self):
-        model = Sequential([
-            Conv2D(32, (3, 3), activation='relu', input_shape=(self.img_size[0], self.img_size[1], 3)),
-            MaxPooling2D((2, 2)),
-            Conv2D(64, (3, 3), activation='relu'),
-            MaxPooling2D((2, 2)),
-            Conv2D(128, (3, 3), activation='relu'),
-            MaxPooling2D((2, 2)),
-            Flatten(),
-            Dense(512, activation='relu'),
-            Dropout(0.5),
-            Dense(len(os.listdir(self.train_dir)), activation='softmax')
-        ])
-        
-        model.compile(optimizer=Adam(),
-                      loss='categorical_crossentropy',
-                      metrics=['accuracy'])
-        return model
-
-    def train(self):
-        train_gen, val_gen, _ = load_data(train_dir=self.train_dir, img_size=self.img_size, batch_size=self.batch_size)
-        self.model.fit(train_gen, epochs=self.epochs, validation_data=val_gen)
-        self.model.save('dog_breed_model.h5')
-
-if __name__ == "__main__":
-    trainer = DogBreedTrainer(train_dir='data/train')
-    trainer.train()
+if __name__ == '__main__':
+    data_dir = 'data/train'
+    names_file = 'data/names.txt'
+    
+    images, names, classes = load_data(data_dir, names_file)
+    
+    X_train, X_val, y_train, y_val = train_test_split(images, names, test_size=0.2, random_state=42)
+    
+    model = build_model((128, 128, 3), len(classes))
+    model.compile(optimizer=Adam(), loss='sparse_categorical_crossentropy', metrics=['accuracy'])
+    
+    model.fit(X_train, y_train, validation_data=(X_val, y_val), epochs=15, batch_size=32)
+    
+    model.save('dog_breed_classifier.h5')

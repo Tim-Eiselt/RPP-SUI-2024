@@ -1,2 +1,2 @@
-# RPP
-Rozpoznavani plemen psu - SUI
+# DBR
+Dog Breed Recognition - SUI

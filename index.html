@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Dog Breed Classifier</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+  </head>
+  <body>
+    <div class="container">
+      <h1 class="mt-5">Dog Breed Classifier</h1>
+      <form method="post" enctype="multipart/form-data">
+        <div class="form-group">
+          <label for="file">Choose an image of a dog</label>
+          <input type="file" class="form-control" id="file" name="file">
+        </div>
+        <button type="submit" class="btn btn-primary">Recognize</button>
+      </form>
+      <div class="mt-3">
+        <h3>{{ prediction }}</h3>
+      </div>
+    </div>
+  </body>
+</html>
